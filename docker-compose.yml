@@ -1,0 +1,51 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: app
+        restart: unless-stopped
+        env_file:
+            - .env
+        environment:
+            DB_CONNECTION: pgsql
+            DB_HOST: db
+            DB_PORT: 5432
+        depends_on:
+            - db
+        networks:
+            - backend-network
+
+    nginx:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: nginx
+        restart: unless-stopped
+        ports:
+            - "9005:80"
+        depends_on:
+            - app
+        networks:
+            - backend-network
+
+    db:
+        image: postgres:18.4-alpine
+        restart: unless-stopped
+        ports:
+            - "5447:5432"
+        environment:
+            POSTGRES_DB: ${DB_DATABASE:-sampledb}
+            POSTGRES_USER: ${DB_USERNAME:-postgres}
+            POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+        volumes:
+            - pgdata:/var/lib/postgresql
+        networks:
+            - backend-network
+
+networks:
+    backend-network:
+        driver: bridge
+
+volumes:
+    pgdata:
