@@ -11,6 +11,9 @@ services:
             DB_CONNECTION: pgsql
             DB_HOST: db
             DB_PORT: 5432
+        volumes:
+            - .:/var/www/html
+            - /var/www/html/vendor
         depends_on:
             - db
         networks:
